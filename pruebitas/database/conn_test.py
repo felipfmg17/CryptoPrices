@@ -2,7 +2,7 @@
 import pymysql
 
 # Open database connection
-db = pymysql.connect("localhost","root","didu.2015","crypto_prices" )
+db = pymysql.connect("localhost","root","root","crypto_prices" )
 
 # prepare a cursor object using cursor() method
 cursor = db.cursor()
