@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f3f9e470-1713-4c6b-8ba5-1eca3603b133" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/database/db_init.sql" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/script_db/db_creation.sql" afterPath="$PROJECT_DIR$/database/db_creation.sql" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/PriceDownloader/PriceDownloader.py" afterPath="$PROJECT_DIR$/src/PriceDownloader/pricedownloader.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/CryptoPrices.iml" afterPath="$PROJECT_DIR$/.idea/CryptoPrices.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pruebitas/database/conn_test.py" afterPath="$PROJECT_DIR$/pruebitas/database/conn_test.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PriceDownloader/pricedownloader.py" afterPath="$PROJECT_DIR$/src/PriceDownloader/pricedownloader.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,14 +17,15 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="pricedownloader.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="pricedownloader.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PriceDownloader/pricedownloader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="139" column="28" lean-forward="true" selection-start-line="139" selection-start-column="28" selection-end-line="139" selection-end-column="28" />
+            <state relative-caret-position="438">
+              <caret line="141" column="0" lean-forward="true" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#182#389#0" expanded="false" />
+                <element signature="e#557#995#0" expanded="false" />
                 <element signature="e#1112#1304#0" expanded="false" />
                 <element signature="e#1416#1603#0" expanded="false" />
                 <element signature="e#1713#1899#0" expanded="false" />
@@ -39,17 +33,29 @@
                 <element signature="e#2747#2913#0" expanded="false" />
                 <element signature="e#2964#2976#0" expanded="false" />
                 <element signature="e#3028#3052#0" expanded="false" />
-                <element signature="e#3208#3268#0" expanded="false" />
-                <element signature="e#3383#3513#0" expanded="false" />
-                <element signature="e#3633#3965#0" expanded="false" />
-                <element signature="e#4389#4952#0" expanded="false" />
-                <element signature="e#5092#5322#0" expanded="false" />
-                <element signature="e#5845#6313#0" expanded="false" />
-                <element signature="e#6337#6432#0" expanded="false" />
-                <element signature="e#6451#6615#0" expanded="false" />
-                <element signature="e#6634#6984#0" expanded="false" />
-                <marker date="1514395392721" expanded="false" signature="5408:5661" ph="..." />
+                <element signature="e#3206#3266#0" expanded="false" />
+                <element signature="e#3381#3511#0" expanded="false" />
+                <element signature="e#3631#3963#0" expanded="false" />
+                <element signature="e#4073#4299#0" expanded="false" />
+                <element signature="e#4380#4943#0" expanded="false" />
+                <element signature="e#5083#5313#0" expanded="false" />
+                <element signature="e#5836#6304#0" expanded="false" />
+                <element signature="e#6328#6423#0" expanded="false" />
+                <element signature="e#6442#6606#0" expanded="false" />
+                <element signature="e#6625#6975#0" expanded="false" />
+                <element signature="e#6994#7601#0" expanded="false" />
+                <marker date="1514397176751" expanded="false" signature="5399:5652" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="crypto_prices_backup.sql" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/database/crypto_prices_backup.sql">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -470,6 +476,7 @@
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#182#389#0" expanded="false" />
+            <element signature="e#557#995#0" expanded="false" />
             <element signature="e#1112#1304#0" expanded="false" />
             <element signature="e#1416#1603#0" expanded="false" />
             <element signature="e#1713#1899#0" expanded="false" />
@@ -477,16 +484,18 @@
             <element signature="e#2747#2913#0" expanded="false" />
             <element signature="e#2964#2976#0" expanded="false" />
             <element signature="e#3028#3052#0" expanded="false" />
-            <element signature="e#3208#3268#0" expanded="false" />
-            <element signature="e#3383#3513#0" expanded="false" />
-            <element signature="e#3633#3965#0" expanded="false" />
-            <element signature="e#4389#4952#0" expanded="false" />
-            <element signature="e#5092#5322#0" expanded="false" />
-            <element signature="e#5845#6313#0" expanded="false" />
-            <element signature="e#6337#6432#0" expanded="false" />
-            <element signature="e#6451#6615#0" expanded="false" />
-            <element signature="e#6634#6984#0" expanded="false" />
-            <marker date="1514395392721" expanded="false" signature="5408:5661" ph="..." />
+            <element signature="e#3206#3266#0" expanded="false" />
+            <element signature="e#3381#3511#0" expanded="false" />
+            <element signature="e#3631#3963#0" expanded="false" />
+            <element signature="e#4073#4299#0" expanded="false" />
+            <element signature="e#4380#4943#0" expanded="false" />
+            <element signature="e#5083#5313#0" expanded="false" />
+            <element signature="e#5836#6304#0" expanded="false" />
+            <element signature="e#6328#6423#0" expanded="false" />
+            <element signature="e#6442#6606#0" expanded="false" />
+            <element signature="e#6625#6975#0" expanded="false" />
+            <element signature="e#6994#7601#0" expanded="false" />
+            <marker date="1514397176751" expanded="false" signature="5399:5652" ph="..." />
           </folding>
         </state>
       </provider>
@@ -514,6 +523,7 @@
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#182#389#0" expanded="false" />
+            <element signature="e#557#995#0" expanded="false" />
             <element signature="e#1112#1304#0" expanded="false" />
             <element signature="e#1416#1603#0" expanded="false" />
             <element signature="e#1713#1899#0" expanded="false" />
@@ -521,16 +531,18 @@
             <element signature="e#2747#2913#0" expanded="false" />
             <element signature="e#2964#2976#0" expanded="false" />
             <element signature="e#3028#3052#0" expanded="false" />
-            <element signature="e#3208#3268#0" expanded="false" />
-            <element signature="e#3383#3513#0" expanded="false" />
-            <element signature="e#3633#3965#0" expanded="false" />
-            <element signature="e#4389#4952#0" expanded="false" />
-            <element signature="e#5092#5322#0" expanded="false" />
-            <element signature="e#5845#6313#0" expanded="false" />
-            <element signature="e#6337#6432#0" expanded="false" />
-            <element signature="e#6451#6615#0" expanded="false" />
-            <element signature="e#6634#6984#0" expanded="false" />
-            <marker date="1514395392721" expanded="false" signature="5408:5661" ph="..." />
+            <element signature="e#3206#3266#0" expanded="false" />
+            <element signature="e#3381#3511#0" expanded="false" />
+            <element signature="e#3631#3963#0" expanded="false" />
+            <element signature="e#4073#4299#0" expanded="false" />
+            <element signature="e#4380#4943#0" expanded="false" />
+            <element signature="e#5083#5313#0" expanded="false" />
+            <element signature="e#5836#6304#0" expanded="false" />
+            <element signature="e#6328#6423#0" expanded="false" />
+            <element signature="e#6442#6606#0" expanded="false" />
+            <element signature="e#6625#6975#0" expanded="false" />
+            <element signature="e#6994#7601#0" expanded="false" />
+            <marker date="1514397176751" expanded="false" signature="5399:5652" ph="..." />
           </folding>
         </state>
       </provider>
@@ -583,11 +595,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/PriceDownloader/pricedownloader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="139" column="28" lean-forward="true" selection-start-line="139" selection-start-column="28" selection-end-line="139" selection-end-column="28" />
+        <state relative-caret-position="438">
+          <caret line="141" column="0" lean-forward="true" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#182#389#0" expanded="false" />
+            <element signature="e#557#995#0" expanded="false" />
             <element signature="e#1112#1304#0" expanded="false" />
             <element signature="e#1416#1603#0" expanded="false" />
             <element signature="e#1713#1899#0" expanded="false" />
@@ -595,17 +608,27 @@
             <element signature="e#2747#2913#0" expanded="false" />
             <element signature="e#2964#2976#0" expanded="false" />
             <element signature="e#3028#3052#0" expanded="false" />
-            <element signature="e#3208#3268#0" expanded="false" />
-            <element signature="e#3383#3513#0" expanded="false" />
-            <element signature="e#3633#3965#0" expanded="false" />
-            <element signature="e#4389#4952#0" expanded="false" />
-            <element signature="e#5092#5322#0" expanded="false" />
-            <element signature="e#5845#6313#0" expanded="false" />
-            <element signature="e#6337#6432#0" expanded="false" />
-            <element signature="e#6451#6615#0" expanded="false" />
-            <element signature="e#6634#6984#0" expanded="false" />
-            <marker date="1514395392721" expanded="false" signature="5408:5661" ph="..." />
+            <element signature="e#3206#3266#0" expanded="false" />
+            <element signature="e#3381#3511#0" expanded="false" />
+            <element signature="e#3631#3963#0" expanded="false" />
+            <element signature="e#4073#4299#0" expanded="false" />
+            <element signature="e#4380#4943#0" expanded="false" />
+            <element signature="e#5083#5313#0" expanded="false" />
+            <element signature="e#5836#6304#0" expanded="false" />
+            <element signature="e#6328#6423#0" expanded="false" />
+            <element signature="e#6442#6606#0" expanded="false" />
+            <element signature="e#6625#6975#0" expanded="false" />
+            <element signature="e#6994#7601#0" expanded="false" />
+            <marker date="1514397176751" expanded="false" signature="5399:5652" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/database/crypto_prices_backup.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

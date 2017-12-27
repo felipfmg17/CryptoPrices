@@ -106,8 +106,6 @@ class PriceDownloader:
 
 
 
-
-
     # Ask for a file with prices from a online exchange
     # It return a string that may be a json
     def requestPriceFromExchange(self):
@@ -140,13 +138,6 @@ class PriceDownloader:
             self.db.commit()
         except Exception as err:
             print(err)
-
-
-
-
-
-
-
 
 
 
