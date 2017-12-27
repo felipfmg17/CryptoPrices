@@ -1,0 +1,20 @@
+
+{
+	"hosts" : {
+		"bitso" : "api.bitso.com"
+	},
+
+	"resources" : {
+		"bitso":{
+			"btc_mxn" : "/v3/ticker/?book=btc_mxn",
+			"eth_mxn" : "/v3/ticker/?book=eth_mxn",
+			"xrp_mxn" : "/v3/ticker/?book=xrp_mxn",
+			"ltc_mxn" : "/v3/ticker/?book=ltc_mxn",
+			"eth_btc" : "/v3/ticker/?book=eth_btc",
+			"xrp_btc" : "/v3/ticker/?book=xrp_btc",
+			"ltc_btc" : "/v3/ticker/?book=ltc_btc",
+			"bch_btc" : "/v3/ticker/?book=bch_btc"		
+		}
+	}
+
+}

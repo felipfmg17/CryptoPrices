@@ -68,22 +68,26 @@ class PriceRecord:
 
 class PriceDownloader:
 
-
     USER_AGENT = 'Mozilla/5.0'
     REQUEST_METHOD = 'GET'
     USER_AGENT_HEADER = 'User-Agent'
     HTTP_DOWNLOAD_ERROR = 'Error while downloading http request: '
     HTTP_VALID_STATUS = 200
+    JSON_FILE_PARSING_ERROR = 'Error uploading or parsing json file : '
+    BITSO_JSON_LAST_PRICE_ERROR = ' Error parsing last price from bitso file'
     FILE_MODE = 'a'
     FILE_SAVE_ERROR = 'Error while writing the file '
-
-    BITSO = 'Bitso'
-
+    EXCHANGES_URLS_FILE_NAME = '../../database/exchanges_paths.json'
+    HOSTS = 'hosts'
+    RESOURCES = 'resources'
+    BITSO = 'bitso'
     BTC_MXN = 'btc_mxn'
     ETH_MXN = 'eth_mxn'
     XRP_MXN = 'xrp_mxn'
-
     PRICE_LAST = 'last'
+    EXCHANGES_URL_MAP = None
+
+
 
 
 
@@ -106,6 +110,10 @@ class PriceDownloader:
 
 
 
+
+    # MAIN METHODS FOR DOWNLOADING, PARSING AND SAVING
+
+
     # Ask for a file with prices from a online exchange
     # It return a string that may be a json
     def requestPriceFromExchange(self):
@@ -113,9 +121,13 @@ class PriceDownloader:
 
     # Parse price from Bitso file, returns integer with price
     def extractLastPriceBitso(self, data):
-        jsonString = json.loads(data)
-        payload = jsonString['payload']
-        lastPrice = payload['last']
+        try:
+            jsonString = json.loads(data)
+            payload = jsonString['payload']
+            lastPrice = payload['last']
+        except Exception as err:
+            print( BITSO_JSON_LAST_PRICE_ERROR )
+            print(err)
         return lastPrice
 
     # Retuns a PriceRecord object from data downloaded from exchange
@@ -139,6 +151,17 @@ class PriceDownloader:
         except Exception as err:
             print(err)
 
+    # request a file from the exchange, extracts the price and stores it 
+    # in the database
+    def downloadLastPrice(self):
+        data = self.requestPriceFromExchange()
+        pr = self.generatePriceRecord(data)
+        print(pr)
+
+
+
+
+
 
 
 
@@ -161,6 +184,49 @@ class PriceDownloader:
 
         data = data.decode('utf-8')
         return data
+
+    # opens a file containing the host url of the exchanges 
+    # and resources path
+    # returns a dictionary 
+    @staticmethod
+    def uploadExchangesURLs():
+        try:
+            exchangesPathsFiles = open(PriceDownloader.EXCHANGES_URLS_FILE_NAME, 'r')
+            jsonString = exchangesPathsFiles.read()
+            data = json.loads(jsonString)
+            return data
+        except Exception as err:
+            print( JSON_FILE_PARSING_ERROR + PriceDownloader.EXCHANGES_URLS_FILE_NAME)
+            print(err)
+        finally:
+            exchangesPathsFiles.close()
+
+    # returns host url associated wit exchangeName
+    @staticmethod
+    def getHostURL(exchangeName):
+        return PriceDownloader.EXCHANGES_URL_MAP[PriceDownloader.HOSTS][exchangeName]
+
+    # returns resource path associate with that exchangeName anc currencyPaht
+    @staticmethod
+    def getResourceURL(exchangeName, currencyPair):
+        return PriceDownloader.EXCHANGES_URL_MAP[PriceDownloader.RESOURCES][exchangeName][currencyPair]
+
+    # returns a PriceDownloader object with the given exchangeName and currencyPair
+    # it is connected with the database and ready to use
+    @staticmethod
+    def getLastPriceDownloader(exchangeName, currencyPair, db):
+        host = PriceDownloader.getHostURL(exchangeName)
+        resource = PriceDownloader.getResourceURL(exchangeName, currencyPair)
+        priceType = PriceDownloader.PRICE_LAST
+        obj = PriceDownloader(host,resource,exchangeName,currencyPair,priceType)
+        obj.setDatabaseConnection(db)
+        return obj
+
+    @staticmethod
+    def getBitsoBtcMxn(db):
+        return PriceDownloader.getLastPriceDownloader(PriceDownloader.BITSO, PriceDownloader.BTC_MXN, db)
+
+
 
 
 
@@ -210,6 +276,7 @@ class PriceDownloader:
 
 
 
+PriceDownloader.EXCHANGES_URL_MAP = PriceDownloader.uploadExchangesURLs()
 
 
 
@@ -248,6 +315,13 @@ def test4():
     time.sleep(1)
     pd.savePriceRecordToDatabase(pr)
 
+def test5():
+    PriceDownloader.uploadExchangesURLs()
+
+def test6():
+    db = pymysql.connect("localhost", "root", "didu.2015", "crypto_prices")
+    pr = PriceDownloader.getBitsoBtcMxn(db)
+    pr.downloadLastPrice()
 
 
-test4()
+test6()
