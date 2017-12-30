@@ -2,6 +2,7 @@ import http.client
 import json
 import time
 import pymysql
+import threading
 
 
 class PriceRecord:
@@ -68,24 +69,49 @@ class PriceRecord:
 
 class PriceDownloader:
 
+    # HTTP CONNECTION PARAMENTERS
+
     USER_AGENT = 'Mozilla/5.0'
     REQUEST_METHOD = 'GET'
     USER_AGENT_HEADER = 'User-Agent'
-    HTTP_DOWNLOAD_ERROR = 'Error while downloading http request: '
     HTTP_VALID_STATUS = 200
+
+    # ERROR MESSAGES
+
     JSON_FILE_PARSING_ERROR = 'Error uploading or parsing json file : '
-    BITSO_JSON_LAST_PRICE_ERROR = ' Error parsing last price from bitso file'
-    FILE_MODE = 'a'
+    BITSO_JSON_LAST_PRICE_ERROR = 'Error parsing last price from bitso file'
+    BITFINEX_JSON_LAST_PRICE_ERROR = 'Error parsing last price from bitfinex file'
     FILE_SAVE_ERROR = 'Error while writing the file '
-    EXCHANGES_URLS_FILE_NAME = '../../database/exchanges_paths.json'
-    HOSTS = 'hosts'
-    RESOURCES = 'resources'
+    HTTP_DOWNLOAD_ERROR = 'Error while downloading http request: '
+    DOWNLOAD_NOT_FINISHED_ERROR = 'Download could not be finished '
+
+    # EXCHANGES NAMES
+
     BITSO = 'bitso'
+    BITFINEX = 'bitfinex'
+
+    # CURRENCY PAIRS
+
     BTC_MXN = 'btc_mxn'
     ETH_MXN = 'eth_mxn'
     XRP_MXN = 'xrp_mxn'
+    BTC_USD = 'btc_usd'
+
+
+
+    STARTED_SUCCESFULLY = 'Pricedownloader started succesfully '
+    PRICE_DOWNLOAD_SUCCESFULL = 'Price downloaded succesfully'
+    WAITING_FOR_NEXT_DOWNLOAD = 'Waiting...'
+    DOWNLOADER_STOPPED = 'Stopped'
+    FILE_MODE = 'a'
+    EXCHANGES_URLS_FILE_NAME = '../../database/exchanges_paths.json'
+    DEFAULT_WAIT_TIME = 5*60
+    HOSTS = 'hosts'
+    RESOURCES = 'resources'
     PRICE_LAST = 'last'
     EXCHANGES_URL_MAP = None
+    LAST_PRICE_EXTRACTOR = {}
+
 
 
 
@@ -99,12 +125,31 @@ class PriceDownloader:
         self.exchangeName = exchangeName
         self.currencyPair = currencyPair
         self.priceType = priceType
+        self.wait_time = PriceDownloader.DEFAULT_WAIT_TIME
+        self.db = None
+
+    def __str__(self):
+        mystr = 'PriceDownloader {'
+        mystr = mystr + 'Exchange: ' + self.exchangeName + '\n'
+        mystr = mystr +'Currency Pair: ' + self.currencyPair + '\n'
+        mystr = mystr + 'Price Type: ' + self.priceType + '\n'
+        mystr = mystr + 'Database status: '
+        mystr = mystr + ( 'disconnected' if self.db==None  else 'connected' ) + '\n'
+        mystr = mystr + '}\n'
+        return mystr
 
     def setDatabaseConnection(self, db):
         self.db = db
 
     def setStoreFileName(self, fileName):
         self.fileName = fileName
+
+    def setWaitTime(self,wait_time):
+        self.wait_time = wait_time
+
+    def getIdentifier(self):
+        mystr = '[' + self.exchangeName + ', ' + self.currencyPair + ']'
+        return mystr
 
 
 
@@ -119,26 +164,18 @@ class PriceDownloader:
     def requestPriceFromExchange(self):
         return PriceDownloader.httpRequest(self.host, self.resource)
 
-    # Parse price from Bitso file, returns integer with price
-    def extractLastPriceBitso(self, data):
-        try:
-            jsonString = json.loads(data)
-            payload = jsonString['payload']
-            lastPrice = payload['last']
-        except Exception as err:
-            print( BITSO_JSON_LAST_PRICE_ERROR )
-            print(err)
-        return lastPrice
-
     # Retuns a PriceRecord object from data downloaded from exchange
     def generatePriceRecord(self, data):
-        dateTimeSec = time.time()
-        exchangeName = self.exchangeName
-        currencyPair = self.currencyPair
-        price = self.extractLastPriceBitso(data)
-        dateTime = time.asctime()
-        priceType = self.priceType
-        pr = PriceRecord(dateTimeSec,exchangeName,currencyPair,price,dateTime,priceType)
+        pr = None
+        extractor = PriceDownloader.LAST_PRICE_EXTRACTOR[self.exchangeName]
+        price = extractor(data)
+        if price!=None:
+            dateTimeSec = time.time()
+            exchangeName = self.exchangeName
+            currencyPair = self.currencyPair
+            dateTime = time.asctime()
+            priceType = self.priceType
+            pr = PriceRecord(dateTimeSec,exchangeName,currencyPair,price,dateTime,priceType)
         return pr
 
     # Stores a priceRecord object to database
@@ -155,10 +192,96 @@ class PriceDownloader:
     # in the database
     def downloadLastPrice(self):
         data = self.requestPriceFromExchange()
+        if data==None :
+            return PriceDownloader.DOWNLOAD_NOT_FINISHED_ERROR
         pr = self.generatePriceRecord(data)
-        print(pr)
+        if pr==None :
+            return PriceDownloader.DOWNLOAD_NOT_FINISHED_ERROR
+        print(pr ,'\n')
+        #self.savePriceRecordToDatabase(pr)
+        return PriceDownloader.PRICE_DOWNLOAD_SUCCESFULL
+
+    # Main function of the class, infinite loop witch downloads a price and
+    # stores it in a database, then it sleeps for some time
+    def begin(self):
+        self.startSuccefulMessage()
+        while self.runningFlag :
+            result = self.downloadLastPrice()
+            self.downloadResultMessage(result)
+            self.waitingMessage()
+            time.sleep(self.wait_time)
+        self.stopMessage()
 
 
+
+
+
+    # STATUS MESSAGES
+
+    def startSuccefulMessage(self):
+        print(self.getIdentifier(), PriceDownloader.STARTED_SUCCESFULLY)
+        print()
+
+    def downloadResultMessage(self,result):
+        print(self.getIdentifier(), result)
+        print()
+
+    def waitingMessage(self):
+        print(self.getIdentifier(), PriceDownloader.WAITING_FOR_NEXT_DOWNLOAD)
+        print()
+
+    def stopMessage(self):
+        print(self.getIdentifier(), PriceDownloader.DOWNLOADER_STOPPED )
+        print()
+
+
+
+
+
+    # CONCURRENT METHODS
+
+    
+    def start(self):
+        th = threading.Thread(target=self.begin)
+        self.runningFlag = True
+        th.start()
+        self.myThread = th
+        return th
+
+    def stop(self):
+        self.runningFlag = False
+
+
+
+
+    # PRICE EXTRACTORS
+
+    # Parse price from Bitso file, returns integer with price
+    @staticmethod
+    def extractLastPriceBitso(data):
+        lastPrice = None
+        try:
+            data = data.decode('utf-8')
+            jsonString = json.loads(data)
+            payload = jsonString['payload']
+            lastPrice = payload['last']
+        except Exception as err:
+            print(PriceDownloader.BITSO_JSON_LAST_PRICE_ERROR)
+            print(err)
+        return lastPrice
+
+    @staticmethod
+    def extractLastPriceBitfinex(data):
+        #print("extractLastPriceBitfinex",data)
+        lastPrice = None
+        try:
+            data = data.decode('utf-8')
+            jsonString = json.loads(data)
+            lastPrice = jsonString['last_price']
+        except Exception as err:
+            print(PriceDownloader.BITFINEX_JSON_LAST_PRICE_ERROR)
+            print(err)
+        return lastPrice
 
 
 
@@ -167,6 +290,12 @@ class PriceDownloader:
 
 
     # STATIC METHODS
+
+    # Merges all extractors function inside a dictionary
+    @staticmethod
+    def uploadLastPriceExtractors():
+        PriceDownloader.LAST_PRICE_EXTRACTOR[PriceDownloader.BITSO] = PriceDownloader.extractLastPriceBitso
+        PriceDownloader.LAST_PRICE_EXTRACTOR[PriceDownloader.BITFINEX] =PriceDownloader.extractLastPriceBitfinex
 
     @staticmethod
     def httpRequest(host, resource):
@@ -178,11 +307,11 @@ class PriceDownloader:
             ans = conn.getresponse()
             if ans.status == PriceDownloader.HTTP_VALID_STATUS:
                 data = ans.read()
+            else:
+                print('Error descargando la informacion', ans.status )
         except Exception as err:
             print(PriceDownloader.HTTP_DOWNLOAD_ERROR, host + resource)
             print(err)
-
-        data = data.decode('utf-8')
         return data
 
     # opens a file containing the host url of the exchanges 
@@ -196,7 +325,7 @@ class PriceDownloader:
             data = json.loads(jsonString)
             return data
         except Exception as err:
-            print( JSON_FILE_PARSING_ERROR + PriceDownloader.EXCHANGES_URLS_FILE_NAME)
+            print( PriceDownloader.JSON_FILE_PARSING_ERROR + PriceDownloader.EXCHANGES_URLS_FILE_NAME)
             print(err)
         finally:
             exchangesPathsFiles.close()
@@ -206,10 +335,19 @@ class PriceDownloader:
     def getHostURL(exchangeName):
         return PriceDownloader.EXCHANGES_URL_MAP[PriceDownloader.HOSTS][exchangeName]
 
-    # returns resource path associate with that exchangeName anc currencyPaht
+    # returns resource path associate with that exchangeName and currencyPath
     @staticmethod
     def getResourceURL(exchangeName, currencyPair):
         return PriceDownloader.EXCHANGES_URL_MAP[PriceDownloader.RESOURCES][exchangeName][currencyPair]
+
+
+
+
+
+
+
+
+    # FACTORY METHODS
 
     # returns a PriceDownloader object with the given exchangeName and currencyPair
     # it is connected with the database and ready to use
@@ -226,7 +364,17 @@ class PriceDownloader:
     def getBitsoBtcMxn(db):
         return PriceDownloader.getLastPriceDownloader(PriceDownloader.BITSO, PriceDownloader.BTC_MXN, db)
 
+    @staticmethod
+    def getBitsoXrpMxn(db):
+        return PriceDownloader.getLastPriceDownloader(PriceDownloader.BITSO, PriceDownloader.XRP_MXN, db)
 
+    @staticmethod
+    def getBitsoEthMxn(db):
+        return PriceDownloader.getLastPriceDownloader(PriceDownloader.BITSO, PriceDownloader.ETH_MXN, db)
+
+    @staticmethod
+    def getBitfinexBtcUsd(db):
+        return PriceDownloader.getLastPriceDownloader(PriceDownloader.BITFINEX, PriceDownloader.BTC_USD, db)
 
 
 
@@ -277,6 +425,7 @@ class PriceDownloader:
 
 
 PriceDownloader.EXCHANGES_URL_MAP = PriceDownloader.uploadExchangesURLs()
+PriceDownloader.uploadLastPriceExtractors()
 
 
 
@@ -323,5 +472,37 @@ def test6():
     pr = PriceDownloader.getBitsoBtcMxn(db)
     pr.downloadLastPrice()
 
+def test7():
+    db = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    pr = PriceDownloader.getBitsoBtcMxn(db)
+    pr.setWaitTime(2*60)
+    pr.start()
 
-test6()
+def test8():
+    db = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    pr = PriceDownloader.getBitfinexBtcUsd(db)
+    pr.start()
+
+def test9():
+    db = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    pr = PriceDownloader.getBitfinexBtcUsd(db)
+    pr.start()
+
+def test10():
+    db = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    prbitsobtc = PriceDownloader.getBitsoBtcMxn(db)
+    prbitsoxrp = PriceDownloader.getBitsoXrpMxn(db)
+    prbitfinexbtc = PriceDownloader.getBitfinexBtcUsd(db)
+    prbitsobtc.setWaitTime(1*60)
+    prbitsoxrp.setWaitTime(1*60)
+    prbitfinexbtc.setWaitTime(1*60)
+    prbitsobtc.start()
+    prbitsoxrp.start()
+    prbitfinexbtc.start()
+
+    time.sleep(10)
+    prbitsobtc.stop()
+    prbitsoxrp.stop()
+    prbitfinexbtc.stop()
+
+test10()

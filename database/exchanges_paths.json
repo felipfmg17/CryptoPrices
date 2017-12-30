@@ -1,7 +1,8 @@
 
 {
 	"hosts" : {
-		"bitso" : "api.bitso.com"
+		"bitso" : "api.bitso.com",
+		"bitfinex" : "api.bitfinex.com"
 	},
 
 	"resources" : {
@@ -14,6 +15,9 @@
 			"xrp_btc" : "/v3/ticker/?book=xrp_btc",
 			"ltc_btc" : "/v3/ticker/?book=ltc_btc",
 			"bch_btc" : "/v3/ticker/?book=bch_btc"		
+		},
+		"bitfinex":{
+			"btc_usd" : "/v1/pubticker/btcusd"
 		}
 	}
 
