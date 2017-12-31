@@ -3,6 +3,7 @@ import json
 import time
 import pymysql
 import threading
+import traceback
 
 
 class PriceRecord:
@@ -209,6 +210,7 @@ class PriceDownloader:
                 result = True
             except Exception as err:
                 print(self.getIdentifier(), PriceDownloader.SQL_INSERT_ERROR , '\n' )
+                print(traceback.format_exc())
                 print(err,'\n')
         return result
     # request a file from the exchange, extracts the price and stores it 
@@ -452,6 +454,23 @@ PriceDownloader.EXCHANGES_URL_MAP = PriceDownloader.uploadExchangesURLs()
 PriceDownloader.uploadLastPriceExtractors()
 
 
+class ValFelpo:
+
+
+    def __init__(self, active_prices_file_name):
+        self.active_prices_file_name = active_prices_file_name
+
+
+    def start(self):
+        my_pairs = open(self.active_prices_file_name, 'r')
+        for line in my_pairs:
+            exchange, currencyPair = line.split()
+            db = pymysql.connect("localhost", "root", "root", "crypto_prices")
+            pd = PriceDownloader.getLastPriceDownloader(exchange,currencyPair,db);
+            pd.start()
+
+
+
 def test1():
     data = PriceDownloader.httpRequest('api.bitso.com', '/v3/ticker/?book=xrp_mxn')
     print(data)
@@ -530,4 +549,8 @@ def test10():
     #prbitsoxrp.stop()
     #prbitfinexbtc.stop()
 
-test10()
+def test11():
+    vf = ValFelpo('active_prices.txt')
+    vf.start()
+
+test11()

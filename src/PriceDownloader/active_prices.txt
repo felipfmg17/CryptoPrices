@@ -1,0 +1,11 @@
+bitso btc_mxn
+bitso eth_mxn
+bitso xrp_mxn
+bitso ltc_mxn
+bitfinex btc_usd
+bitfinex eth_usd
+bitfinex xrp_usd
+bitfinex ltc_usd
+bitfinex iot_usd
+bitfinex bch_usd
+bitfinex dsh_usd
