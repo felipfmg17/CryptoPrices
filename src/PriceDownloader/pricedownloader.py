@@ -21,13 +21,20 @@ class PriceRecord:
 
     # Returns a sql statement ready to insert it into bd
     def getSQLInsertStatement(self, bd):
-        sql = 'insert into coin_price(date_time_sec, exchange_id, currency_pair_id, price, date_time, price_type_id) '
-        sql = sql + 'values(' + str(self.dataTimeSec) + ', '
-        sql = sql + str( self.getExchangeId(bd) ) + ', '
-        sql = sql + str( self.getCurrencyPairId(bd) ) + ', '
-        sql = sql + str(self.price) + ', '
-        sql = sql + 'NOW(), '
-        sql = sql + str( self.getPriceTypeId(bd) ) + ')'
+        sql = None
+        try:
+            sql = 'insert into coin_price(date_time_sec, exchange_id, currency_pair_id, price, date_time, price_type_id) '
+            sql = sql + 'values(' + str(self.dataTimeSec) + ', '
+            sql = sql + str( self.getExchangeId(bd) ) + ', '
+            sql = sql + str( self.getCurrencyPairId(bd) ) + ', '
+            sql = sql + str(self.price) + ', '
+            sql = sql + 'NOW(), '
+            sql = sql + str( self.getPriceTypeId(bd) ) + ')'
+        except Exception as err:
+            th = threading.current_thread()
+            print(str(err) + '\n')
+            print(th.name, PriceDownloader.SQL_SELECT_ERROR)
+            print()
         return sql
 
     # Returns the id from the database related with its currency Pair
@@ -36,6 +43,7 @@ class PriceRecord:
         sql = 'select id from currency_pair where name = \"' + self.currencyPair + '\"'
         cursor.execute(sql)
         data = cursor.fetchone()[0]
+        cursor.close()
         return data
 
     # Return the id from the database related with its exchange Name
@@ -44,6 +52,7 @@ class PriceRecord:
         sql = 'select id from exchange where name = \"' + self.exchangeName + '\"'
         cursor.execute(sql)
         data = cursor.fetchone()[0]
+        cursor.close()
         return data
 
     # Return the id from the database related with its price type
@@ -52,6 +61,7 @@ class PriceRecord:
         sql = 'select id from price_type where name = \"' + self.priceType + '\"'
         cursor.execute(sql)
         data = cursor.fetchone()[0]
+        cursor.close()
         return data
 
     def toMap(self):
@@ -63,7 +73,6 @@ class PriceRecord:
         mapa['dateTime'] = self.dateTime
         mapa['priceType'] = self.priceType
         return mapa
-
 
 
 
@@ -84,6 +93,8 @@ class PriceDownloader:
     FILE_SAVE_ERROR = 'Error while writing the file '
     HTTP_DOWNLOAD_ERROR = 'Error while downloading http request: '
     DOWNLOAD_NOT_FINISHED_ERROR = 'Download could not be finished '
+    SQL_INSERT_ERROR = 'Error while saving price into database '
+    SQL_SELECT_ERROR = 'Error while extracting information from database '
 
     # EXCHANGES NAMES
 
@@ -96,6 +107,12 @@ class PriceDownloader:
     ETH_MXN = 'eth_mxn'
     XRP_MXN = 'xrp_mxn'
     BTC_USD = 'btc_usd'
+    XRP_USD = 'xrp_usd'
+    ETH_USD = 'eth_usd'
+    BCH_USD = 'bch_usd'
+    LTC_USD = 'ltc_usd'
+    IOT_USD = 'iot_usd'
+    XMR_USD = 'xmr_usd'
 
 
 
@@ -148,7 +165,8 @@ class PriceDownloader:
         self.wait_time = wait_time
 
     def getIdentifier(self):
-        mystr = '[' + self.exchangeName + ', ' + self.currencyPair + ']'
+        th = threading.current_thread()
+        mystr = '[' + th.name + ', ' + self.exchangeName + ', ' + self.currencyPair + ']'
         return mystr
 
 
@@ -181,13 +199,18 @@ class PriceDownloader:
     # Stores a priceRecord object to database
     def savePriceRecordToDatabase(self, priceRecord):
         sql = priceRecord.getSQLInsertStatement(self.db)
-        try:
-            cursor = self.db.cursor()
-            cursor.execute(sql)
-            self.db.commit()
-        except Exception as err:
-            print(err)
-
+        result = False
+        if sql != None :
+            try:
+                cursor = self.db.cursor()
+                cursor.execute(sql)
+                cursor.close()
+                self.db.commit()
+                result = True
+            except Exception as err:
+                print(self.getIdentifier(), PriceDownloader.SQL_INSERT_ERROR , '\n' )
+                print(err,'\n')
+        return result
     # request a file from the exchange, extracts the price and stores it 
     # in the database
     def downloadLastPrice(self):
@@ -197,8 +220,9 @@ class PriceDownloader:
         pr = self.generatePriceRecord(data)
         if pr==None :
             return PriceDownloader.DOWNLOAD_NOT_FINISHED_ERROR
-        print(pr ,'\n')
-        #self.savePriceRecordToDatabase(pr)
+        ans = self.savePriceRecordToDatabase(pr)
+        if ans==False:
+            return PriceDownloader.DOWNLOAD_NOT_FINISHED_ERROR
         return PriceDownloader.PRICE_DOWNLOAD_SUCCESFULL
 
     # Main function of the class, infinite loop witch downloads a price and
@@ -428,7 +452,6 @@ PriceDownloader.EXCHANGES_URL_MAP = PriceDownloader.uploadExchangesURLs()
 PriceDownloader.uploadLastPriceExtractors()
 
 
-
 def test1():
     data = PriceDownloader.httpRequest('api.bitso.com', '/v3/ticker/?book=xrp_mxn')
     print(data)
@@ -489,20 +512,22 @@ def test9():
     pr.start()
 
 def test10():
-    db = pymysql.connect("localhost", "root", "root", "crypto_prices")
-    prbitsobtc = PriceDownloader.getBitsoBtcMxn(db)
-    prbitsoxrp = PriceDownloader.getBitsoXrpMxn(db)
-    prbitfinexbtc = PriceDownloader.getBitfinexBtcUsd(db)
-    prbitsobtc.setWaitTime(1*60)
-    prbitsoxrp.setWaitTime(1*60)
-    prbitfinexbtc.setWaitTime(1*60)
+    db1 = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    db2 = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    db3 = pymysql.connect("localhost", "root", "root", "crypto_prices")
+    prbitsobtc = PriceDownloader.getBitsoBtcMxn(db1)
+    prbitsoxrp = PriceDownloader.getBitsoXrpMxn(db2)
+    prbitfinexbtc = PriceDownloader.getBitfinexBtcUsd(db3)
+    prbitsobtc.setWaitTime(2*60)
+    prbitsoxrp.setWaitTime(2*60)
+    prbitfinexbtc.setWaitTime(2*60)
     prbitsobtc.start()
     prbitsoxrp.start()
     prbitfinexbtc.start()
 
     time.sleep(10)
-    prbitsobtc.stop()
-    prbitsoxrp.stop()
-    prbitfinexbtc.stop()
+    #prbitsobtc.stop()
+    #prbitsoxrp.stop()
+    #prbitfinexbtc.stop()
 
 test10()

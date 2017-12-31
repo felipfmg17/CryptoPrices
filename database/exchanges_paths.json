@@ -17,7 +17,14 @@
 			"bch_btc" : "/v3/ticker/?book=bch_btc"		
 		},
 		"bitfinex":{
-			"btc_usd" : "/v1/pubticker/btcusd"
+			"btc_usd" : "/v1/pubticker/btcusd",
+			"xrp_usd" : "/v1/pubticker/xrpusd",
+			"eth_usd" : "/v1/pubticker/ethusd",
+			"ltc_usd" : "/v1/pubticker/ltcbtc",
+			"iot_usd" : "/v1/pubticker/iotusd",
+			"xmr_usd" : "/v1/pubticker/xmrusd",
+			"dsh_usd" : "/v1/pubticker/dshusd",
+			"bch_usd" : "/v1/pubticker/bchusd"
 		}
 	}
 
