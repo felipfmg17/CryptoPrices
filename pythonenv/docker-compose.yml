@@ -1,0 +1,6 @@
+pythondev:
+   build: .
+   command: bash
+   volumes:
+      - "~/virtualenvs":~/.local/share/virtualenvs/
+      - "../code":~/code
