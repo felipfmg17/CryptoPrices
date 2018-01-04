@@ -467,6 +467,7 @@ class ValFelpo:
             exchange, currencyPair = line.split()
             db = pymysql.connect("localhost", "root", "root", "crypto_prices")
             pd = PriceDownloader.getLastPriceDownloader(exchange,currencyPair,db);
+            pd.setWaitTime(60)
             pd.start()
 
 
